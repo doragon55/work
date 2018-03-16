@@ -1,0 +1,66 @@
+■gtkを使用したアプリをWindows（Eclipse）でビルドする
+https://kokawa2003.blogspot.jp/2014/09/gtkwindows.html
+http://adeigjl.blogspot.jp/2011/06/gtk-helloworld.html
+
+１．gtkをダウンローﾄﾞする
+
+32bit
+http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.24/gtk+-bundle_2.24.10-20120208_win32.zip
+64bit
+http://ftp.gnome.org/pub/gnome/binaries/win64/gtk+/2.22/gtk+-bundle_2.22.1-20101229_win64.zip 
+
+で適当なところ
+C:\gtk_2.24.10
+とかに解凍してC:\gtk_2.24.10\binにパスを通す。
+環境変数 GTK_HOME C:\gtk_2.24.10 を設定する。
+
+コマンドプロンプトにて以下を実行
+>pkg-config --cflags gtk+-2.0
+>gtk-demo
+でアプリが立ち上がったのを確認する。
+
+２．Eclipseでの作業
+
+①適当なプロジェクトを作成
+　Mekefileプロジェクト > 空のプロジェクト
+　C/C++ ビルド > ビルダ設定 > Makefile生成 > 自動的にMekefileを生成 をチェックする
+
+②ソースを書く
+　http://developer.gnome.org/gtk-tutorial/stable/c39.html#SEC-HELLOWORLD
+
+③プロジェクトのプロパティからインクルードパスを通す。
+C/C++ ビルド > 設定 --- ツール設定タブ > GCC C++ Compiler > Includes にてパスを通す。
+C:\gtk+-bundle_2.22.1-20101229_win64\Include\gtk-2.0
+C:\gtk+-bundle_2.22.1-20101229_win64\Include\glib-2.0
+C:\gtk+-bundle_2.22.1-20101229_win64\lib\gtk-2.0\include
+C:\gtk+-bundle_2.22.1-20101229_win64\lib\glib-2.0\include
+C:\gtk+-bundle_2.22.1-20101229_win64\include\cario
+C:\gtk+-bundle_2.22.1-20101229_win64\include\pango-1.0
+C:\gtk+-bundle_2.22.1-20101229_win64\include\gdk-pixbuf-2.0
+C:\gtk+-bundle_2.22.1-20101229_win64\include\atk-1.0
+すべて通すのは手間がかかるので、コード補完がある程度出来る程度にしておく。
+
+④コマンドプロンプトにて以下を実行
+>pkg-config --cflags gtk+-2.0 > a.txt
+>pkg-config --libs gtk+-2.0 > b.txt
+わたしの場合
+a.txt
+-mms-bitfields -IC:/gtk_2.24.10/include/gtk-2.0 -IC:/gtk_2.24.10/lib/gtk-2.0/include -IC:/gtk_2.24.10/include/atk-1.0 -IC:/gtk_2.24.10/include/cairo -IC:/gtk_2.24.10/include/gdk-pixbuf-2.0 -IC:/gtk_2.24.10/include/pango-1.0 -IC:/gtk_2.24.10/include/glib-2.0 -IC:/gtk_2.24.10/lib/glib-2.0/include -IC:/gtk_2.24.10/include -IC:/gtk_2.24.10/include/freetype2 -IC:/gtk_2.24.10/include/libpng14
+ 
+b.txt
+-LC:/gtk_2.24.10/lib -lgtk-win32-2.0 -lgdk-win32-2.0 -latk-1.0 -lgio-2.0 -lpangowin32-1.0 -lgdi32 -lpangocairo-1.0 -lgdk_pixbuf-2.0 -lpango-1.0 -lcairo -lgobject-2.0 -lgmodule-2.0 -lgthread-2.0 -lglib-2.0 -lintl  
+
+だった。
+
+⑤コマンドでリダイレクトしたテキストファイルの内容を「ビルド変数」に追加
+(プロジェクトのプロパティ > C/C++ ビルド > ビルド変数)において、
+最初のコマンドの内容をgtk-inc、次のコマンドの内容をgtk-libとして追加する。
+
+⑥プロジェクトのプロパティ > C/C++ ビルド > 設定 --- ツール設定タブ
+GCC C++ Compiler > コマンド行パターン と
+MinGW C++ Linker > コマンド行パターン の末尾に ${gtk-inc} ${gtk-lib}を追加。
+
+⑦ビルドしてみる。
+うまくいいってたらビルドできる。
+
+  
