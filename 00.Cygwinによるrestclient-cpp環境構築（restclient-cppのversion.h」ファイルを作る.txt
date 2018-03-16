@@ -1,0 +1,68 @@
+■Cygwinによるrestclient-cpp環境構築（restclient-cppのversion.h」ファイルを作る）
+
+●git等をCygwinにインストールする（Cygwinが既にインストールされているものとする）
+（https://qiita.com/kanpou_/items/0764381301d37e04157b）
+
+1.再度、setup-x86.exe（Cygwinのインストーラー） を実行。
+
+2.「次へ」をクリック
+
+3.「Cygwin Setup - Choose Installation Type」では、規定（デフォルト）の「Install from Internet」のままで、「次へ(N) >」をクリック
+
+4.「Cygwin Setup - Choose Installation Directory」でも規定（デフォルト）の設定のままで、「次へ(N) >」をクリック
+(Root Directoryは C:\cygwin )
+
+5.「Cygwin Setup - Select Local Package Directory」でも規定（デフォルト）の設定のままで、「次へ(N) >」をクリック
+
+6.「Cygwin Setup - Select Connection Type」では、「Use Internet Explorer Proxy Settings」を選択して、「次へ」をクリック
+
+7.「Cygwin Setup Choose A Download Site」では，ftp://ftp.yz.yamagata-u.ac.jp を選択して、「次へ」をクリック
+
+8.「Cygwin Setup - Select Packages」では、ViewをCategoryにして、Searchボックスに git と入力し、Develを展開し、
+
+New列をクリックしていき、
+
+ Devel/git
+ Devel/git-completion
+ Devel/git-cvs
+ Debug/git-debuginfo
+ Devel/git-email
+ Devel/git-gui
+ Devel/git-svn
+ Devel/gitk
+ 
+
+等を選択する。
+
+9.「Cygwin Setup - Resolving Dependencies」では、Select required packages(RECOMMENDED) にチェックが入っているのを確認し、
+そのまま、「次へ」をクリック
+
+10.インストールが始まる。3分ぐらい待つ。
+
+11.インストール終了。完了をクリック
+
+12.以下のツールに関してもgitと同様にインストールする
+
+　make
+　libtool
+　autoconf
+　automake
+
+●C++用のRESTクライアント restclient-cpp の「version.h」ファイルを作る
+（「version.h」は、後でEclipseの環境でコンパイルする際に必要なもの）
+（http://yasuharu519.hatenablog.com/entry/2015/01/08/100825）
+
+1.Cygwin Terminalを開いて以下のコマンドを順次実行する
+
+　$ git clone https://github.com/mrtazz/restclient-cpp
+　$ cd restclient-cpp
+　$ ./autogen.sh
+　$ ./configure
+　$ make　←　実行するとエラーが発生するが「version.h」ファイルは作成される
+　$ make install（不要）
+
+2.以下に「version.h」ファイルが作成される
+
+　C:\cygwin\home\ZZJHS008\restclient-cpp\include\restclient-cpp
+　（※：「ZZJHS008」はログインユーザー名なので環境により異なる）
+

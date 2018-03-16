@@ -1,0 +1,88 @@
+■Eclipseでrestclient-cppのライブラリを作成する
+（※：restclient-cppはlibcurlのC++のラッパー）
+
+１．Windows(MinGW)でlibcurlを使えるようにする。
+
+　libcurl (cURL)は、さまざまなプロトコルを実装したライブラリ。
+　MIT/X derivate license。
+　このライブラリを使うことでcurlコマンドラインユーティリティと同じことをC言語等の自作プログラムから実現できる。
+
+　Windowsで利用するにはcURLのサイトにさまざまなバイナリイメージが置いてあり、これを利用するのが手っ取り早い。
+
+　適当なサイトから「curl-7.21.6-devel-mingw32.zip」をダウンロードする。
+　（「curl-7.21.6-devel-mingw32.zip」で検索すればダウンロードできるサイトが出てくる。）
+
+　ダウンロードしたファイルを適当な場所に展開する
+    c:\work\curl-7.21.6-devel-mingw32
+
+　展開後のファイルを以下のようにMinGW所定の場所にコピーする
+    c:\work\curl-7.21.6-devel-mingw32\bin -> \MinGW\bin
+    c:\work\curl-7.21.6-devel-mingw32\include -> \MinGW\include
+    c:\work\curl-7.21.6-devel-mingw32\lib -> \MinGW\lib
+
+　これで準備完了。
+
+２．Eclipseでrestclient-cppのライブラリを作成する
+
+　GitHubから「restclient-cpp-master.zip」をダウンロードする。
+　（「restclient-cpp」で検索すればGitHubのサイトが出てくる。）
+
+　ダウンロードしたファイルを適当な場所に展開する
+　c:\work\restclient-cpp
+　
+　EclipseでC++の空のプロジェクトをrestclient-cppという名前で作成する。
+
+　restclient-cppプロジェクトで右クリック > インポートで以下のファイルをインポートする
+
+　c:\work\restclient-cpp\sourceの下のファイル
+　c:\work\restclient-cpp\include\restclient-cppフォルダ
+　
+　「ビルド変数」に以下を追加
+　　(プロジェクトのプロパティ > C/C++ ビルド > ビルド変数)において、
+　　変数名：C++11、値：-std=c++11を追加
+　
+　プロジェクトのプロパティ > C/C++ ビルド > 設定 --- ツール設定タブ
+　GCC C++ Compiler > コマンド行パターンの末尾に${C++11}を追加
+　（※：「connection.cc」の「int64_t」のコンパイルエラーを回避するため）
+
+　プロジェクトのプロパティ > C/C++ ビルド > 設定 --- ビルド成果物タブ
+　成果物タイプで「static ライブラリ」を選択する
+
+　ビルドしてみる。
+　うまくいいってたらビルドできる。
+　
+　「librestclient-cpp.a」が作成される
+
+　「librestclient-cpp.a」を「\MinGW\lib」にコピーする
+　
+３．サンプルプログラムの作成
+　
+　EclipseでC++の空のプロジェクトを例えば「rest-client-test」という名前で作成する。
+　
+　サンプルソース「rest-client-test.cpp」を作成する。（以下参照）
+　（http://yasuharu519.hatenablog.com/entry/2015/01/08/100825）
+　
+　上記ファイルをインポートで取り込む
+　
+　「ビルド変数」に以下を追加
+　　(プロジェクトのプロパティ > C/C++ ビルド > ビルド変数)において、
+　　変数名：C++11、値：-std=c++11を追加
+　
+　プロジェクトのプロパティ > C/C++ ビルド > 設定 --- ツール設定タブ
+　GCC C++ Compiler > コマンド行パターンの末尾に${C++11}を追加
+　（※：「connection.cc」の「int64_t」のコンパイルエラーを回避するため）
+　
+　プロジェクトのプロパティ > C/C++ ビルド > 設定 --- ツール設定タブ
+　MinGW C++ Linker > コマンド行パターンの末尾に${C++11}と「-lrestclient-cpp -lcurl -lcurldll」を追加
+
+　ビルドしてみる。
+　うまくいいってたらビルドできる。
+
+４．補足説明
+
+　●libcurlでhttps通信時の証明書
+
+　　https通信を行う際、Windows版のlibcurlには必要な証明書が含まれていないために、CURLE_SSL_CACERT(=60)で失敗してしまう。
+　　そこでセキュリティ上はよくないのだけど、「connection.cc」の「RestClient::Connection::performCurlRequest()」
+　　の先頭に「curl_easy_setopt(this->curlHandle,CURLOPT_SSL_VERIFYPEER,FALSE);」を追加することでエラーを回避できる。
+
