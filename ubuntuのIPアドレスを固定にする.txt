@@ -1,0 +1,91 @@
+■UbuntuのIPアドレスを固定にする
+
+１．変更すべきNICを特定する
+
+ 「ip address」コマンドでNICの一覧を確認する
+ 
+ 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+ 2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether 08:00:27:84:a6:7e brd ff:ff:ff:ff:ff:ff
+    inet 192.168.1.15/24 brd 192.168.1.255 scope global dynamic enp0s3
+       valid_lft 13752sec preferred_lft 13752sec
+
+ 今回の場合、「enp0s3」が外部につながるNICで「192.168.1.15」が振られていることが判明
+ 「enp0s3」のIPアドレスを「192.168.1.15」に固定する
+ 
+２．各種設定を確認する
+
+ 「ifconfig」コマンドを実行する
+ 
+ enp0s3: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.1.15  netmask 255.255.255.0  broadcast 192.168.1.255
+        inet6 fe80::25af:b085:e163:5486  prefixlen 64  scopeid 0x20<link>
+        inet6 2400:7800:4d96:7a00:5136:d6c2:1300:c3e0  prefixlen 64  scopeid 0x0<global>
+        inet6 2400:7800:4d96:7a00:b165:699:5c55:6f80  prefixlen 64  scopeid 0x0<global>
+        ether 08:00:27:84:a6:7e  txqueuelen 1000  (イーサネット)
+        RX packets 1351  bytes 348636 (348.6 KB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 1201  bytes 234889 (234.8 KB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+ lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (ローカルループバック)
+        RX packets 300  bytes 28202 (28.2 KB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 300  bytes 28202 (28.2 KB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+ 「netmask」が「255.255.255.0」「broadcast」が「192.168.1.255」
+ であることが判明
+ 
+ 「route -n」コマンドを実行する
+ 
+ カーネルIP経路テーブル
+ 受信先サイト    ゲートウェイ    ネットマスク   フラグ Metric Ref 使用数 インタフェース
+ 0.0.0.0         192.168.1.1     0.0.0.0         UG    100    0        0 enp0s3
+ 169.254.0.0     0.0.0.0         255.255.0.0     U     1000   0        0 enp0s3
+ 192.168.1.0     0.0.0.0         255.255.255.0   U     0      0        0 enp0s3
+ 192.168.1.0     0.0.0.0         255.255.255.0   U     100    0        0 enp0s3
+
+ 「ゲートウェイ」が「192.168.1.1」であることが判明
+ 
+  「cat /etc/resolv.conf」コマンドを実行する
+  
+  namesever 127.0.0.53
+ 
+  の箇所がネームサーバーのアドレスであることが判明
+  
+ ３．IPアドレスを固定する
+
+ エディタで「/etc/network/interfaces」ファイルを開き、項目を追加する
+
+ # interfaces(5) file used by ifup(8) and ifdown(8)
+ auto lo
+ iface lo inet loopback
+
+ auto enp0s3
+ iface enp0s3 inet static
+ address 192.168.1.15
+ netmask 255.255.255.0
+ broadcast 192.168.1.255
+ gateway 192.168.1.1
+ dns-nameservers 127.0.0.53
+
+ 「auto enp0s3」以下が追加された項目
+
+４．設定を一ヵ所にまとめるための追加モジュールをインストール
+
+ 「sudo apt-get install resolvconf」
+  ※：このモジュールをインストールすることで「dns-nameservers」が利用可能になる
+
+５．ネットワーク設定を反映する
+
+ 「sudo service networking restart」
+
