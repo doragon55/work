@@ -62,7 +62,32 @@
  
   の箇所がネームサーバーのアドレスであることが判明
   
- ３．IPアドレスを固定する
+３．IPアドレスを固定する（17.10以降）
+
+ エディタで「/etc/netplan/01-network-manager-all.yaml」ファイルを開き、項目を追加する
+
+ # This file describes the network interfaces available on your system
+ # For more information, see netplan(5).
+ network:
+   version: 2
+   renderer: networkd
+   ethernets:
+     enp0s3:
+       dhcp4: no
+       addresses: [192.168.1.17/24]
+       gateway4: 192.168.11.1
+       nameservers:
+         addresses: [172.0.0.53]
+       dhcp6: no
+
+ 「ethernets:」以下が追加された項目
+
+４．ネットワーク設定を反映する
+
+ 「sudo netplan apply」
+
+
+３．IPアドレスを固定する（17.10より前）
 
  エディタで「/etc/network/interfaces」ファイルを開き、項目を追加する
 
