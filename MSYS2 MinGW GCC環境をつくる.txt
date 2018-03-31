@@ -1,0 +1,94 @@
+■MSYS2 MinGW GCC環境をつくる
+（https://blogs.osdn.jp/2018/01/30/msys2-mingw.html）
+
+１．MSYS2をダウンロードする
+
+　以下のサイトからダウンロード
+　http://www.msys2.org/
+　
+２．MSYS2をインストールする
+
+　ダウンロードした「msys2-x86_64-20161025.exe」をダブルクリックするとインストーラーが起動します。
+　（基本デフォルトでOK）
+
+３．パッケージを更新する
+
+　「MSYS2 MinGW 64-bit」を実行
+
+　パッケージデータベースを最新にするコマンド
+　pacman -Sy
+　
+　パッケージをアップグレードするコマンド
+　pacman -Su
+　
+　確認メッセージが出るので、そのままEnterキーを押します。
+　
+　警告のメッセージが出て処理が止まった場合は、右上の×でターミナルを終了した後
+　再度「MSYS2 MinGW 64-bit」を実行
+　
+　”何も行うことがありません”と表示されてパッケージ更新の必要がなくなるまで、「pacman -Su」を繰り返し実行してください。
+４．GCCパッケージをインストールする
+　
+　gccを含むパッケージを検索するコマンド
+　pacman -Ssq gcc
+
+　mingw-w64-x86_64-gccパッケージをインストールするコマンド
+　pacman -S mingw-w64-x86_64-gcc
+
+　gccのバージョンを表示するコマンド
+　gcc --version
+　
+　Windowsのコマンドプロンプト(cmd.exe)でもPATH環境変数に「C:\msys64\mingw64\bin」を追加すれば、
+　gccコマンドを使うことができます。
+
+５．makeパッケージをインストールする
+
+　gccはmingw-w64-x86_64-で始まるパッケージをインストールしましたが、makeコマンドはmingw-w64-の付かない
+　MSYSのmakeパッケージをインストールします。
+
+　mingw-w64-*-makeの場合はコマンドの名前がmake.exeではなくmingw32-make.exeとなっており、
+　自分でmake.exeにリネームするなどの手間がかかります。
+
+　makeパッケージをインストールするコマンド
+　pacman -S make
+　
+６．gtkmmパッケージをインストールする
+
+　gtkmmを含むパッケージを検索するコマンド
+　pacman -Ssq gtkmm
+
+　gtkmm3 (64ビット版)をインストールするコマンド
+　pacman -S mingw-w64-x86_64-gtkmm3
+
+　pkg-configを含むパッケージを検索するコマンド
+　pacman -Ssq pkg-config
+
+　mingw-w64-x86_64-pkg-configパッケージをインストールするコマンド
+　pacman -S mingw-w64-x86_64-pkg-config
+
+　gtkmm-3.0のコンパイルに必要な引数を表示するコマンド
+　pkg-config gtkmm-3.0 --cflags --libs
+
+７．Eclipseでgtkmmを参照できるようにする（エラーの表示を無くす）
+
+　CPLUS_INCLUDE_PATHを取得するコマンド
+　pkg-config --cflags-only-I gtkmm-3.0 | sed -e "s/^-I//" | sed -e "s/ -I/;/g"
+
+　プロジェクトのプロパティを開いてC/C++ Build → Environment（環境）で
+　上記出力結果を追加する
+
+　プロジェクトのプロパティ、C/C++ General → Path and Symbolsに切り替えて、Includesタブを表示しすると
+　空っぽだったInclude directoriesにたくさんのディレクトリが並んでいます。
+　Eclipse CDTには環境変数CPLUS_INCLUDE_PATHを自動的に参照して構成してくれる機能がある。
+
+　Eclipse CDTがヘッダーファイルを認識するとエラーが消えるだけではありません。
+　コード補完という嬉しい機能も使えるようになります。
+
+８．gdbをインストールする
+
+　gdbを含むパッケージを検索するコマンド
+　pacman -Ssq gdb
+
+　mingw-w64-x86_64-gdbパッケージをインストールするコマンド
+　pacman -S mingw-w64-x86_64-gdb
+
